@@ -2,7 +2,14 @@
 globals [
  energy ;;Energia/vida dos agentes
   group ;;se as hienas estao em grupo
+
 ]
+
+breed [hienas hiena]
+breed [lions lion]
+lions-own[sleep-timer]
+
+
 
 
 to setup
@@ -13,22 +20,28 @@ to setup
       set pcolor red
     ] [
       ifelse random-float 100 < (comidaGrande) [
-        set pcolor blue
+        set pcolor brown
       ] [
         set pcolor black
       ]
     ]
+
+
+  ]
+  ask n-of 5 patches [
+    set pcolor blue
   ]
 
-  create-turtles quantLions [
+  create-lions quantLions [
     set color orange
     set shape "bug"
     set size 1
     set energy 100
+    set sleep-timer 0
     setxy random-xcor random-ycor
   ]
 
-   create-turtles quantHienas [
+   create-hienas quantHienas [
     set color grey
     set shape "fish"
     set size 1
@@ -44,18 +57,65 @@ end
 to go
 
   ask turtles [
+    if breed = lions [move_lions]
+
+    if breed = hienas [move_hiennas]
+  ]
+
+
+tick
+end
+
+
+
+
+to move_lions
+    ask lions [
     let random-direction random 3
     let found 0
     let left-color [pcolor] of patch-left-and-ahead 90 1
     let right-color [pcolor] of patch-right-and-ahead 90 1
     let ahead-color [pcolor] of patch-ahead 1
+    let sleep 0
 
-    if left-color != black [
+    if energy <= 0 [
+    die
+    ]
+
 
       if left-color = blue [
+        left 90
+        fd 1
+        set sleep-timer 5
+
+      ]
+
+      if right-color = blue [
+        right 90
+        fd 1
+        set sleep-timer 5
+
+      ]
+
+      if ahead-color = blue [
+        fd 1
+        set sleep-timer 5
+      ]
+
+     ifelse sleep-timer > 0 [
+        set sleep-timer sleep-timer - 1
+      ] [
+
+
+
+    if left-color != black[
+
+      if left-color = brown [
+        set energy energy + comidaGrandeEnergy
         ask patch-left-and-ahead 90 1 [set pcolor red] ]
 
         if left-color = red [
+        set energy energy + comidaPequenaEnergy
         ask patch-left-and-ahead 90 1 [set pcolor black] ]
 
       left 90
@@ -63,12 +123,16 @@ to go
       set found 1
     ]
 
+
+
     if right-color != black [
 
-      if right-color = blue [
+      if right-color = brown [
+        set energy energy + comidaGrandeEnergy
         ask patch-right-and-ahead 90 1 [set pcolor red] ]
 
         if right-color = red [
+        set energy energy + comidaPequenaEnergy
         ask patch-right-and-ahead 90 1 [set pcolor black] ]
 
       right 90
@@ -78,10 +142,12 @@ to go
 
     if ahead-color != black [
 
-      if ahead-color = blue [
+      if ahead-color = brown [
+        set energy energy + comidaGrandeEnergy
         ask patch-ahead 1 [set pcolor red] ]
 
         if ahead-color = red [
+        set energy energy + comidaPequenaEnergy
         ask patch-ahead 1 [set pcolor black] ]
 
       forward 1
@@ -90,6 +156,7 @@ to go
 
 
     if found = 0  [
+
     if random-direction = 0 [
       fd 1  ;; move forward
     ]
@@ -102,9 +169,125 @@ to go
       fd 1  ;; move forward
     ]
    ]
+ ]
   ]
-
 end
+
+
+
+
+
+to move_hiennas
+    ask hienas [
+    let random-direction random 3
+    let found 0
+    let left-color [pcolor] of patch-left-and-ahead 90 1
+    let right-color [pcolor] of patch-right-and-ahead 90 1
+    let ahead-color [pcolor] of patch-ahead 1
+    let sleep 0
+
+    if energy <= 0 [
+    die
+    ]
+
+    if breed = lions [
+
+      if left-color = blue [
+        left 90
+        fd 1
+        set sleep-timer 5
+
+      ]
+
+      if right-color = blue [
+        right 90
+        fd 1
+        set sleep-timer 5
+
+      ]
+
+      if ahead-color = blue [
+        fd 1
+        set sleep-timer 5
+
+      ]
+    ]
+
+
+    if left-color != black[
+
+      if left-color = brown [
+        set energy energy + comidaGrandeEnergy
+        ask patch-left-and-ahead 90 1 [set pcolor red] ]
+
+        if left-color = red [
+        set energy energy + comidaPequenaEnergy
+        ask patch-left-and-ahead 90 1 [set pcolor black] ]
+
+      left 90
+      forward 1
+      set found 1
+    ]
+
+
+
+    if right-color != black [
+
+      if right-color = brown [
+        set energy energy + comidaGrandeEnergy
+        ask patch-right-and-ahead 90 1 [set pcolor red] ]
+
+        if right-color = red [
+        set energy energy + comidaPequenaEnergy
+        ask patch-right-and-ahead 90 1 [set pcolor black] ]
+
+      right 90
+      forward 1
+      set found 1
+    ]
+
+    if ahead-color != black [
+
+      if ahead-color = brown [
+        set energy energy + comidaGrandeEnergy
+        ask patch-ahead 1 [set pcolor red] ]
+
+        if ahead-color = red [
+        set energy energy + comidaPequenaEnergy
+        ask patch-ahead 1 [set pcolor black] ]
+
+      forward 1
+      set found 1
+    ]
+
+
+    if found = 0  [
+
+    if random-direction = 0 [
+      fd 1  ;; move forward
+    ]
+    if random-direction = 1 [
+      left 90  ;; turn left by 90 degrees
+      fd 1  ;; move forward
+    ]
+    if random-direction = 2 [
+      right 90  ;; turn right by 90 degrees
+      fd 1  ;; move forward
+    ]
+   ]
+
+  ]
+end
+
+
+
+
+
+
+
+
+
+
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -176,7 +359,7 @@ comidaPequena
 comidaPequena
 0
 20
-17.0
+12.0
 1
 1
 NIL
@@ -191,7 +374,7 @@ comidaGrande
 comidaGrande
 0
 10
-8.0
+10.0
 1
 1
 NIL
@@ -206,7 +389,7 @@ quantLions
 quantLions
 0
 50
-45.0
+17.0
 1
 1
 NIL
@@ -221,7 +404,37 @@ quantHienas
 quantHienas
 0
 50
+25.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+729
+87
+901
+120
+comidaGrandeEnergy
+comidaGrandeEnergy
+0
+50
 40.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+736
+146
+911
+179
+comidaPequenaEnergy
+comidaPequenaEnergy
+0
+50
+20.0
 1
 1
 NIL
