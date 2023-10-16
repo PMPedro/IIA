@@ -10,12 +10,9 @@ breed [lions lion]
 lions-own[sleep-timer]
 
 
-
-
 to setup
   clear-all
-
-  ask patches [
+  ask patches [ ;;cria tabuleiro com a % de comida que o user defenir
     ifelse random-float 100 < (comidaPequena) [
       set pcolor red
     ] [
@@ -25,14 +22,12 @@ to setup
         set pcolor black
       ]
     ]
-
-
-  ]
-  ask n-of 5 patches [
-    set pcolor blue
   ]
 
-  create-lions quantLions [
+  ask n-of 5 patches ;;Cria 5 ninhos
+  [ set pcolor blue ]
+
+  create-lions quantLions [ ;;Cria leoes
     set color orange
     set shape "bug"
     set size 1
@@ -41,7 +36,7 @@ to setup
     setxy random-xcor random-ycor
   ]
 
-   create-hienas quantHienas [
+   create-hienas quantHienas [ ;;Cria hiennas
     set color grey
     set shape "fish"
     set size 1
@@ -56,11 +51,23 @@ end
 
 to go
 
-  ask turtles [
-    if breed = lions [move_lions]
+let total-patches count patches ;; conta total de patches
+let red-patches count patches with [pcolor = red] ;;conta total de patches vermelhas
+let red-percentage red-patches / total-patches * 100  ;;ve quantos pachtes vermelhos ha
 
-    if breed = hienas [move_hiennas]
+if red-percentage < comidaPequena [ ;;se for inferior a percentagem de comida referida pelo utilizado, ele da respwn
+  let new-food-patches-needed round((comidaPequena - red-percentage) / 100 * total-patches) ;;determina quanto sao precisos
+  ask n-of new-food-patches-needed patches with [pcolor != red] [
+    set pcolor red
   ]
+]
+
+  ask turtles [
+    ifelse energy <= 0 [ die ][
+    if breed = lions [move_lions]
+    if breed = hienas [move_hiennas]
+ ]
+]
 
 
 tick
@@ -71,6 +78,7 @@ end
 
 to move_lions
     ask lions [
+
     let random-direction random 3
     let found 0
     let left-color [pcolor] of patch-left-and-ahead 90 1
@@ -79,49 +87,45 @@ to move_lions
     let sleep 0
 
     if energy <= 0 [
-    die
+      die
     ]
 
+    if left-color = blue [
+      left 90
+      fd 1
+      set sleep-timer 5
+    ]
 
-      if left-color = blue [
-        left 90
-        fd 1
-        set sleep-timer 5
+    if right-color = blue [
+      right 90
+      fd 1
+      set sleep-timer 5
+    ]
 
-      ]
+    if ahead-color = blue [
+      fd 1
+      set sleep-timer 5
+    ]
 
-      if right-color = blue [
-        right 90
-        fd 1
-        set sleep-timer 5
+    ifelse sleep-timer > 0 [
+      set sleep-timer sleep-timer - 1
+    ] [
 
-      ]
+      if left-color != black[
 
-      if ahead-color = blue [
-        fd 1
-        set sleep-timer 5
-      ]
-
-     ifelse sleep-timer > 0 [
-        set sleep-timer sleep-timer - 1
-      ] [
-
-
-
-    if left-color != black[
-
-      if left-color = brown [
-        set energy energy + comidaGrandeEnergy
-        ask patch-left-and-ahead 90 1 [set pcolor red] ]
+        if left-color = brown [
+          set energy energy + comidaGrandeEnergy
+          ask patch-left-and-ahead 90 1 [set pcolor red] ]
 
         if left-color = red [
-        set energy energy + comidaPequenaEnergy
-        ask patch-left-and-ahead 90 1 [set pcolor black] ]
+          set energy energy + comidaPequenaEnergy
+          ask patch-left-and-ahead 90 1 [set pcolor black] ]
 
-      left 90
-      forward 1
-      set found 1
-    ]
+        left 90
+        forward 1
+        set found 1
+        set energy energy - 1
+      ]
 
 
 
@@ -138,6 +142,7 @@ to move_lions
       right 90
       forward 1
       set found 1
+        set energy energy - 1
     ]
 
     if ahead-color != black [
@@ -152,6 +157,7 @@ to move_lions
 
       forward 1
       set found 1
+      set energy energy - 1
     ]
 
 
@@ -159,14 +165,17 @@ to move_lions
 
     if random-direction = 0 [
       fd 1  ;; move forward
+      set energy energy - 1
     ]
     if random-direction = 1 [
       left 90  ;; turn left by 90 degrees
       fd 1  ;; move forward
+      set energy energy - 1
     ]
     if random-direction = 2 [
       right 90  ;; turn right by 90 degrees
       fd 1  ;; move forward
+      set energy energy - 1
     ]
    ]
  ]
@@ -190,30 +199,6 @@ to move_hiennas
     die
     ]
 
-    if breed = lions [
-
-      if left-color = blue [
-        left 90
-        fd 1
-        set sleep-timer 5
-
-      ]
-
-      if right-color = blue [
-        right 90
-        fd 1
-        set sleep-timer 5
-
-      ]
-
-      if ahead-color = blue [
-        fd 1
-        set sleep-timer 5
-
-      ]
-    ]
-
-
     if left-color != black[
 
       if left-color = brown [
@@ -227,6 +212,7 @@ to move_hiennas
       left 90
       forward 1
       set found 1
+      set energy energy - 1
     ]
 
 
@@ -244,6 +230,7 @@ to move_hiennas
       right 90
       forward 1
       set found 1
+      set energy energy - 1
     ]
 
     if ahead-color != black [
@@ -258,6 +245,7 @@ to move_hiennas
 
       forward 1
       set found 1
+      set energy energy - 1
     ]
 
 
@@ -265,21 +253,22 @@ to move_hiennas
 
     if random-direction = 0 [
       fd 1  ;; move forward
+      set energy energy - 1
     ]
     if random-direction = 1 [
       left 90  ;; turn left by 90 degrees
       fd 1  ;; move forward
+      set energy energy - 1
     ]
     if random-direction = 2 [
       right 90  ;; turn right by 90 degrees
       fd 1  ;; move forward
+      set energy energy - 1
     ]
    ]
 
   ]
 end
-
-
 
 
 
@@ -310,8 +299,8 @@ GRAPHICS-WINDOW
 16
 -16
 16
-0
-0
+1
+1
 1
 ticks
 30.0
@@ -359,7 +348,7 @@ comidaPequena
 comidaPequena
 0
 20
-12.0
+3.0
 1
 1
 NIL
@@ -374,7 +363,7 @@ comidaGrande
 comidaGrande
 0
 10
-10.0
+2.0
 1
 1
 NIL
@@ -389,7 +378,7 @@ quantLions
 quantLions
 0
 50
-17.0
+1.0
 1
 1
 NIL
@@ -404,7 +393,7 @@ quantHienas
 quantHienas
 0
 50
-25.0
+4.0
 1
 1
 NIL
@@ -419,7 +408,7 @@ comidaGrandeEnergy
 comidaGrandeEnergy
 0
 50
-40.0
+50.0
 1
 1
 NIL
@@ -434,7 +423,7 @@ comidaPequenaEnergy
 comidaPequenaEnergy
 0
 50
-20.0
+25.0
 1
 1
 NIL
