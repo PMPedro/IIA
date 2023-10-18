@@ -1,10 +1,13 @@
 ;;vars globais
 globals [
- energy ;;Energia/vida dos agentes
+  energy ;;Energia/vida dos agentes
   group ;;se as hienas estao em grupo
-
 ]
 
+; Células Castanhas -> Pequeno Porte
+; Células Vermelhas -> Grande Porte
+; Hienas -> Fish
+; Leões -> Bug
 breed [hienas hiena]
 breed [lions lion]
 lions-own[sleep-timer]
@@ -12,12 +15,12 @@ lions-own[sleep-timer]
 
 to setup
   clear-all
-  ask patches [ ;;cria tabuleiro com a % de comida que o user defenir
+  ask patches [ ;;cria tabuleiro com a % de comida que o user definir
     ifelse random-float 100 < (comidaPequena) [
-      set pcolor red
+      set pcolor red ; 0% e 10% para as celulas vermelhas
     ] [
       ifelse random-float 100 < (comidaGrande) [
-        set pcolor brown
+        set pcolor brown ; 0% e 20% para as celulas castanhas
       ] [
         set pcolor black
       ]
@@ -27,27 +30,34 @@ to setup
   ask n-of 5 patches ;;Cria 5 ninhos
   [ set pcolor blue ]
 
+  setupLions
+  setupHienas
+
+  reset-ticks
+end
+
+to setupLions
   create-lions quantLions [ ;;Cria leoes
     set color orange
     set shape "bug"
     set size 1
-    set energy 100
+    set energy energiaAgentes
     set sleep-timer 0
     setxy random-xcor random-ycor
   ]
+end
 
-   create-hienas quantHienas [ ;;Cria hiennas
+to setupHienas
+  create-hienas quantHienas [ ;;Cria hienas
     set color grey
     set shape "fish"
     set size 1
-    set energy 100
+    set energy energiaAgentes
     setxy random-xcor random-ycor
+    set group 1
+    ; aquando da sua criação, os agentes do tipo hiena deverão receber um nível de agrupamento igual a 1
   ]
-  reset-ticks
 end
-
-
-
 
 to go
 
@@ -55,10 +65,10 @@ let total-patches count patches ;; conta total de patches
 let red-patches count patches with [pcolor = red] ;;conta total de patches vermelhas
 let red-percentage red-patches / total-patches * 100  ;;ve quantos pachtes vermelhos ha
 
-if red-percentage < comidaPequena [ ;;se for inferior a percentagem de comida referida pelo utilizado, ele da respwn
+if red-percentage < comidaPequena [ ;;se for inferior a percentagem de comida referida pelo utilizado, ele da respawn
   let new-food-patches-needed round((comidaPequena - red-percentage) / 100 * total-patches) ;;determina quanto sao precisos
   ask n-of new-food-patches-needed patches with [pcolor != red] [
-    set pcolor red
+    set pcolor red ; pq vermelho, não devia ser castanho pq é para spawnar random alimentos de pequeno porte??
   ]
 ]
 
@@ -85,6 +95,23 @@ to move_lions
     let right-color [pcolor] of patch-right-and-ahead 90 1
     let ahead-color [pcolor] of patch-ahead 1
     let sleep 0
+    let left-destino patch-left-and-ahead 90 1
+    let right-destino patch-right-and-ahead 90 1
+    let ahead-destino patch-ahead 1
+
+    let lNumHienas count hienas-on left-destino
+    let rNumHienas count hienas-on right-destino
+    let aNumHienas count hienas-on ahead-destino
+
+    let totalHienas lnumHienas + rNumHienas + aNumHienas
+
+    if (totalHienas >= 1) [
+      ask one-of hienas-on neighbors [
+        ;perdendo uma percentagem do valor da energia (percentagem configurada pelo utilizador)
+        set pcolor brown
+        die
+      ]
+    ]
 
     if energy <= 0 [
       die
@@ -93,18 +120,18 @@ to move_lions
     if left-color = blue [
       left 90
       fd 1
-      set sleep-timer 5
+      set sleep-timer descansoLeao
     ]
 
     if right-color = blue [
       right 90
       fd 1
-      set sleep-timer 5
+      set sleep-timer descansoLeao
     ]
 
     if ahead-color = blue [
       fd 1
-      set sleep-timer 5
+      set sleep-timer descansoLeao
     ]
 
     ifelse sleep-timer > 0 [
@@ -128,7 +155,6 @@ to move_lions
       ]
 
 
-
     if right-color != black [
 
       if right-color = brown [
@@ -149,11 +175,13 @@ to move_lions
 
       if ahead-color = brown [
         set energy energy + comidaGrandeEnergy
-        ask patch-ahead 1 [set pcolor red] ]
+        ask patch-ahead 1 [set pcolor red]
+        ]
 
-        if ahead-color = red [
+      if ahead-color = red [
         set energy energy + comidaPequenaEnergy
-        ask patch-ahead 1 [set pcolor black] ]
+        ask patch-ahead 1 [set pcolor black]
+      ]
 
       forward 1
       set found 1
@@ -237,17 +265,18 @@ to move_hiennas
 
       if ahead-color = brown [
         set energy energy + comidaGrandeEnergy
-        ask patch-ahead 1 [set pcolor red] ]
+        ask patch-ahead 1 [set pcolor red]
+        ]
 
-        if ahead-color = red [
+      if ahead-color = red [
         set energy energy + comidaPequenaEnergy
-        ask patch-ahead 1 [set pcolor black] ]
+        ask patch-ahead 1 [set pcolor black]
+      ]
 
       forward 1
       set found 1
       set energy energy - 1
     ]
-
 
     if found = 0  [
 
@@ -269,7 +298,6 @@ to move_hiennas
 
   ]
 end
-
 
 
 
@@ -378,7 +406,7 @@ quantLions
 quantLions
 0
 50
-1.0
+8.0
 1
 1
 NIL
@@ -393,7 +421,7 @@ quantHienas
 quantHienas
 0
 50
-4.0
+10.0
 1
 1
 NIL
@@ -428,6 +456,28 @@ comidaPequenaEnergy
 1
 NIL
 HORIZONTAL
+
+INPUTBOX
+25
+516
+180
+576
+energiaAgentes
+100.0
+1
+0
+Number
+
+INPUTBOX
+27
+592
+182
+652
+descansoLeao
+5.0
+1
+0
+Number
 
 @#$#@#$#@
 ## WHAT IS IT?
