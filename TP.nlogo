@@ -10,8 +10,8 @@ globals [
 ; Leões -> Bug
 breed [hienas hiena]
 breed [lions lion]
-lions-own[sleep-timer]
-
+breed [prays pray]
+lions-own [sleep-timer]
 
 to setup
   clear-all
@@ -32,8 +32,19 @@ to setup
 
   setupLions
   setupHienas
+  setupPrays
 
   reset-ticks
+end
+
+to setupPrays
+  create-prays NrPresas [
+    set color green
+    set shape "circle"
+    set size 1
+    set energy EnergyPresas
+    setxy random-xcor random-ycor
+  ]
 end
 
 to setupLions
@@ -60,36 +71,29 @@ to setupHienas
 end
 
 to go
+  let total-patches count patches ;; conta total de patches
+  let red-patches count patches with [pcolor = red] ;;conta total de patches vermelhas
+  let red-percentage red-patches / total-patches * 100  ;;ve quantos pachtes vermelhos ha
 
-let total-patches count patches ;; conta total de patches
-let red-patches count patches with [pcolor = red] ;;conta total de patches vermelhas
-let red-percentage red-patches / total-patches * 100  ;;ve quantos pachtes vermelhos ha
-
-if red-percentage < comidaPequena [ ;;se for inferior a percentagem de comida referida pelo utilizado, ele da respawn
-  let new-food-patches-needed round((comidaPequena - red-percentage) / 100 * total-patches) ;;determina quanto sao precisos
-  ask n-of new-food-patches-needed patches with [pcolor != red] [
-    set pcolor red ; pq vermelho, não devia ser castanho pq é para spawnar random alimentos de pequeno porte??
+  if red-percentage < comidaPequena [ ;;se for inferior a percentagem de comida referida pelo utilizado, ele da respawn
+    let new-food-patches-needed round((comidaPequena - red-percentage) / 100 * total-patches) ;;determina quanto sao precisos
+    ask n-of new-food-patches-needed patches with [pcolor != red] [
+      set pcolor red ; pq vermelho, não devia ser castanho pq é para spawnar random alimentos de pequeno porte??
+    ]
   ]
-]
 
   ask turtles [
-    ifelse energy <= 0 [ die ][
-    if breed = lions [move_lions]
-    if breed = hienas [move_hienas]
 
- ]
-]
+      if breed = lions [move_lions]
+      if breed = hienas [move_hienas]
+      if breed = prays [move_presas]
 
-
-tick
+  ]
+  tick
 end
 
-
-
-
 to move_lions
-    ask lions [
-
+  ask lions [
     let random-direction random 3
     let found 0
     let left-color [pcolor] of patch-left-and-ahead 90 1
@@ -97,81 +101,107 @@ to move_lions
     let ahead-color [pcolor] of patch-ahead 1
     let sleep 0
 
-   let left-patch patch-left-and-ahead 90 1
+    let left-patch patch-left-and-ahead 90 1
     let right-patch patch-right-and-ahead 90 1
     let ahead-patch patch-ahead 1
 
     let lNumHienas count hienas-on left-patch
     let rNumHienas count hienas-on right-patch
     let aNumHienas count hienas-on ahead-patch
-
-
-
-
     let jogada 0
+    ;;teste prays ;;
 
-    let totalHienas lnumHienas + rNumHienas + aNumHienas
+        ;;TESTE
+ let pray-ahead prays-on patch-ahead 1
+    let pray-left prays-on patch-left-and-ahead 90 1
+    let pray-right prays-on patch-right-and-ahead 90 1
 
+    if any? pray-ahead or any? pray-left or any? pray-right [
+      let target nobody
+      if any? pray-ahead [ set target pray-ahead ]
+      if any? pray-left [ set target pray-left ]
+      if any? pray-right [ set target pray-right ]
+
+      if target != nobody [
+        ask one-of target [
+          die
+
+        ]
+        set energy energy + EnergyPresas  ; Energy gained from hunting
+      ]
+    ]
+
+;;TESTE
+
+    ;;
+
+        let hiena-ahead hienas-on patch-ahead 1
+    let hiena-left hienas-on patch-left-and-ahead 90 1
+    let hiena-right hienas-on patch-right-and-ahead 90 1
+
+    let totalHienas lNumHienas + rNumHienas + aNumHienas
+    if(any? hiena-ahead or any? hiena-left or any? hiena-right) [
     if (totalHienas = 1) [
-     set energy energy - comidaPerdidaCombate ;; vida que perde devido a combate
-     set energy energy + comidaPequenaEnergy
+      set energy energy - comidaPerdidaCombate ;; vida que perde devido a combate
+      set energy energy + comidaPequenaEnergy
 
-    ask one-of hienas-on neighbors [
+           let target-hiena one-of hienas-on neighbors
+         if target-hiena != nobody [
+      ask target-hiena [
         ;perdendo uma percentagem do valor da energia (percentagem configurada pelo utilizador)
         set pcolor brown
         die
       ]
+          ]
       set jogada 1
     ]
 
-    if(lNumHienas >= 2) [
+    if (lNumHienas >= 2) [
       right 90
       fd 1
       set energy energy - 2
       set jogada 1
     ]
 
-    if(rNumHienas >= 2) [
+    if (rNumHienas >= 2) [
       left 90
       fd 1
       set energy energy - 2
       set jogada 1
     ]
 
-    if((aNumHienas >= 2 or lNumHienas >= 2) and (rNumHienas >= 1) ) [
+    if ((aNumHienas >= 2 or lNumHienas >= 2) and (rNumHienas >= 1)) [
       right 180
       fd 1
       set energy energy - 3
       set jogada 1
     ]
 
-    if((aNumHienas >= 1 and lNumHienas >= 1)) [
+    if ((aNumHienas >= 1 and lNumHienas >= 1)) [
       right 45
       fd 1
       set energy energy - 5
       set jogada 1
     ]
 
-
-    if(rNumHienas >= 1 and aNumHienas >= 1) [
+    if (rNumHienas >= 1 and aNumHienas >= 1) [
       left 45
       fd 1
       set energy energy - 5
       set jogada 1
     ]
 
-    if(lNumHienas >= 1 and rNumHienas >= 1 and aNumHienas >= 1 ) [
+    if (lNumHienas >= 1 and rNumHienas >= 1 and aNumHienas >= 1) [
       right 180
       fd 1
       set energy energy - 4
       set jogada 1
     ]
-
+      ]
 
     if energy <= 0 [
       die
     ]
-
 
     if left-color = blue and jogada != 1 [
       left 90
@@ -198,11 +228,13 @@ to move_lions
 
         if left-color = brown [
           set energy energy + comidaGrandeEnergy
-          ask patch-left-and-ahead 90 1 [set pcolor red] ]
+          ask patch-left-and-ahead 90 1 [set pcolor red]
+        ]
 
         if left-color = red [
           set energy energy + comidaPequenaEnergy
-          ask patch-left-and-ahead 90 1 [set pcolor black] ]
+          ask patch-left-and-ahead 90 1 [set pcolor black]
+        ]
 
         left 90
         forward 1
@@ -211,64 +243,61 @@ to move_lions
       ]
 
 
-    if right-color != black and jogada != 1[
+      if right-color != black and jogada != 1 [
 
-      if right-color = brown [
-        set energy energy + comidaGrandeEnergy
-        ask patch-right-and-ahead 90 1 [set pcolor red] ]
-
-        if right-color = red [
-        set energy energy + comidaPequenaEnergy
-        ask patch-right-and-ahead 90 1 [set pcolor black] ]
-
-      right 90
-      forward 1
-      set found 1
-        set energy energy - 1
-    ]
-
-    if ahead-color != black and jogada != 1 [
-
-      if ahead-color = brown[
-        set energy energy + comidaGrandeEnergy
-        ask patch-ahead 1 [set pcolor red]
+        if right-color = brown [
+          set energy energy + comidaGrandeEnergy
+          ask patch-right-and-ahead 90 1 [set pcolor red]
         ]
 
-      if ahead-color = red [
-        set energy energy + comidaPequenaEnergy
-        ask patch-ahead 1 [set pcolor black]
+        if right-color = red [
+          set energy energy + comidaPequenaEnergy
+          ask patch-right-and-ahead 90 1 [set pcolor black]
+        ]
+
+        right 90
+        forward 1
+        set found 1
+        set energy energy - 1
       ]
 
-      forward 1
-      set found 1
-      set energy energy - 1
-    ]
+      if ahead-color != black and jogada != 1 [
 
+        if ahead-color = brown [
+          set energy energy + comidaGrandeEnergy
+          ask patch-ahead 1 [set pcolor red]
+        ]
 
-    if found = 0  [
+        if ahead-color = red [
+          set energy energy + comidaPequenaEnergy
+          ask patch-ahead 1 [set pcolor black]
+        ]
 
-    if random-direction = 0 [
-      fd 1  ;; move forward
-      set energy energy - 1
+        forward 1
+        set found 1
+        set energy energy - 1
+      ]
+
+      if found = 0 [
+
+        if random-direction = 0 [
+          fd 1 ;; move forward
+          set energy energy - 1
+        ]
+        if random-direction = 1 [
+          left 90 ;; turn left by 90 degrees
+          fd 1 ;; move forward
+          set energy energy - 1
+        ]
+        if random-direction = 2 [
+          right 90 ;; turn right by 90 degrees
+          fd 1 ;; move forward
+          set energy energy - 1
+        ]
+      ]
     ]
-    if random-direction = 1 [
-      left 90  ;; turn left by 90 degrees
-      fd 1  ;; move forward
-      set energy energy - 1
-    ]
-    if random-direction = 2 [
-      right 90  ;; turn right by 90 degrees
-      fd 1  ;; move forward
-      set energy energy - 1
-    ]
-   ]
- ]
   ]
 end
-
-
-
-
 
 to move_hienas
   ask hienas [
@@ -287,7 +316,30 @@ to move_hienas
     let right-hienas count hienas-on right-patch
     let ahead-hienas count hienas-on ahead-patch
 
-    let group-level 1  ;; Inicioaliza em 1
+    let group-level 1 ;; Inicioaliza em 1
+
+
+    ;;TESTE
+ let pray-ahead prays-on patch-ahead 1
+    let pray-left prays-on patch-left-and-ahead 90 1
+    let pray-right prays-on patch-right-and-ahead 90 1
+
+    if any? pray-ahead or any? pray-left or any? pray-right [
+      let target nobody
+      if any? pray-ahead [ set target pray-ahead ]
+      if any? pray-left [ set target pray-left ]
+      if any? pray-right [ set target pray-right ]
+
+      if target != nobody [
+        ask one-of target [
+          die
+
+        ]
+        set energy energy + EnergyPresas  ; Energy gained from hunting
+      ]
+    ]
+
+;;TESTE
 
     if left-hienas > 0 [set group-level group-level + 1]
     if right-hienas > 0 [set group-level group-level + 1]
@@ -296,29 +348,11 @@ to move_hienas
     ;muda a cor da hiena, com base no grup
     ifelse group-level > 1 [
       set color yellow
-    ]  [
+    ] [
       set color grey
     ]
 
-    ;test
-;
-;        let lionenergy 0
-;
-;
-;     if group-level > 1 and count lions-on patches in-cone 1 180 with [sleep-timer = 0] = 1 [
-;      let target-lion one-of lions-on patches in-cone 1 180 with [sleep-timer = 0]
-;      ask target-lion [ set lionenergy energy]
-;      let energy-to-lose * energiaAgentes(lionenergy / group-level)  ;; Adjust the percentage accordingly
-;      ask target-lion [
-;        set pcolor brown  ;; Turn the lion into a large food item
-;        die
-;      ]
-;      set energy energy - energy-to-lose  ;; Reduce the energy of the hyena accordingly
-;    ]
-
-    ;teste
-
-    if left-patch != nobody and [pcolor] of left-patch != black [
+    if left-patch != nobody and ([pcolor] of left-patch != black) [
       if [pcolor] of left-patch = brown [
         set energy energy + comidaGrandeEnergy
         ask left-patch [set pcolor red]
@@ -333,7 +367,7 @@ to move_hienas
       set energy energy - 1
     ]
 
-    if right-patch != nobody and [pcolor] of right-patch != black [
+    if right-patch != nobody and ([pcolor] of right-patch != black) [
       if [pcolor] of right-patch = brown [
         set energy energy + comidaGrandeEnergy
         ask right-patch [set pcolor red]
@@ -348,7 +382,7 @@ to move_hienas
       set energy energy - 1
     ]
 
-    if ahead-patch != nobody and [pcolor] of ahead-patch != black [
+    if ahead-patch != nobody and ([pcolor] of ahead-patch != black) [
       if [pcolor] of ahead-patch = brown [
         set energy energy + comidaGrandeEnergy
         ask ahead-patch [set pcolor red]
@@ -362,26 +396,70 @@ to move_hienas
       set energy energy - 1
     ]
 
-    if found = 0  [
+    if found = 0 [
       if random-direction = 0 [
-        fd 1  ;; move forward
+        fd 1 ;; move forward
         set energy energy - 1
       ]
       if random-direction = 1 [
-        left 90  ;; turn left by 90 degrees
-        fd 1  ;; move forward
+        left 90 ;; turn left by 90 degrees
+        fd 1 ;; move forward
         set energy energy - 1
       ]
       if random-direction = 2 [
-        right 90  ;; turn right by 90 degrees
-        fd 1  ;; move forward
+        right 90 ;; turn right by 90 degrees
+        fd 1 ;; move forward
         set energy energy - 1
       ]
     ]
   ]
 end
 
+to move_presas
+  ask prays [
+    let found 0
+    let random-direction random 3
+    let ahead-color [pcolor] of patch-ahead 1
+    let ahead-patch patch-ahead 1
+    let aNumHienas count hienas-on ahead-patch
+    let aNumLions count lions-on ahead-patch
 
+     if energy <= 0 [ die ]
+
+    if (aNumHienas >= 1 and aNumLions >= 1) [
+      set random-direction random 3
+
+      if random-direction = 0 [
+        left 90 ;; turn left by 90 degrees
+        fd 1 ;; move forward
+        set energy energy - 1
+      ]
+      if random-direction = 1 [
+        left 90 ;; turn left by 90 degrees
+        fd 1 ;; move forward
+        set energy energy - 1
+      ]
+    ]
+
+    if found = 0 [
+
+      if random-direction = 0 [
+        fd 1 ;; move forward
+        set energy energy - 1
+      ]
+      if random-direction = 1 [
+        left 90 ;; turn left by 90 degrees
+        fd 1 ;; move forward
+        set energy energy - 1
+      ]
+      if random-direction = 2 [
+        right 90 ;; turn right by 90 degrees
+        fd 1 ;; move forward
+        set energy energy - 1
+      ]
+    ]
+  ]
+end
 @#$#@#$#@
 GRAPHICS-WINDOW
 210
@@ -590,6 +668,36 @@ PENS
 "lions" 1.0 0 -3844592 true "" "plot count lions"
 "Hienas" 1.0 0 -4539718 true "" "plot count hienas"
 "Total" 1.0 0 -16777216 true "" "plot count turtles"
+
+SLIDER
+734
+47
+906
+80
+NrPresas
+NrPresas
+0
+20
+20.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+927
+54
+1099
+87
+EnergyPresas
+EnergyPresas
+1
+30
+3.0
+1
+1
+NIL
+HORIZONTAL
 
 @#$#@#$#@
 ## WHAT IS IT?
