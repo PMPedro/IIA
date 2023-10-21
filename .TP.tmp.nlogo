@@ -301,20 +301,8 @@ to move_hienas
     ]
 
     ;test
-;
-;        let lionenergy 0
-;
-;
-;     if group-level > 1 and count lions-on patches in-cone 1 180 with [sleep-timer = 0] = 1 [
-;      let target-lion one-of lions-on patches in-cone 1 180 with [sleep-timer = 0]
-;      ask target-lion [ set lionenergy energy]
-;      let energy-to-lose * energiaAgentes(lionenergy / group-level)  ;; Adjust the percentage accordingly
-;      ask target-lion [
-;        set pcolor brown  ;; Turn the lion into a large food item
-;        die
-;      ]
-;      set energy energy - energy-to-lose  ;; Reduce the energy of the hyena accordingly
-;    ]
+
+
 
     ;teste
 
