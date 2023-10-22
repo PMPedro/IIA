@@ -1,3 +1,7 @@
+;globals[
+;  verifica
+;  verifica2
+;]
 ; Células Castanhas -> Pequeno Porte
 ; Células Vermelhas -> Grande Porte
 ; Hienas -> Fish
@@ -16,6 +20,8 @@ hienas-own [
 
 
 to setup
+  ;set verifica 0
+  ;set verifica2 0
   clear-all
   ask patches [ ;;cria tabuleiro com a % de comida que o user definir
     ifelse random-float 100 < (comidaPequena) [
@@ -74,6 +80,29 @@ to go
       set pcolor red
     ]
   ]
+
+;  if not any? lions with [energy > 0] and verifica != 1 [
+;    print (word "O último leão morreu no tick " ticks)
+;    set verifica 1
+;  ]
+;
+;  if not any? hienas with [energy > 0] and verifica2 != 1 [
+;    print (word "A última hiena morreu no tick " ticks)
+;    set verifica2 1
+;  ]
+;
+;  if ticks = 500 [
+;
+;    if count lions != 0 [print(word "Leões Vivos: " count lions)]
+;
+;    if count hienas != 0 [print(word "Hienas Vivas: " count hienas)]
+;
+;    show("------")
+;
+;    stop
+;  ]
+
+  if count hienas = 0 and count lions = 0 [stop]
 
   ask turtles [
     ifelse energy <= 0 [ die ][
@@ -195,17 +224,14 @@ to move_lions
           let hiena-left one-of hienas-here  with [patch-here = left-destino]
           let hiena-right one-of hienas-here  with [patch-here = right-destino]
           (ifelse hiena-ahead != nobody[
-            show("[LEAO] COMBATEEEEEEEEEEEEEE AHEAD")
             set energy energy - ([energy] of hiena-ahead * (energiaCombateLeao / 100))
             set ahead-color brown
             ask hiena-ahead[die]
           ] hiena-left != nobody [
-            show("[LEAO] COMBATEEEEEEEEEEEEEE LEFT")
             set energy energy - ([energy] of hiena-left * (energiaCombateLeao / 100))
             set left-color brown
             ask hiena-left[die]
           ] hiena-right != nobody [
-            show("[LEAO] COMBATEEEEEEEEEEEEEE RIGHT")
             set energy energy - ([energy] of hiena-right * (energiaCombateLeao / 100))
             set right-color brown
             ask hiena-right[die]
@@ -264,6 +290,7 @@ end
 
 to move_hiennas
   ask hienas [
+
     let random-direction random 3
     let found 0
     set group 0
@@ -315,21 +342,21 @@ to move_hiennas
         let leao-right one-of lions-here  with [patch-here = right-destino]
 
         (ifelse leao-left != nobody [
-          show("[HIENA] COMBATEEEEEEEEEEEEEE LEFT")
           set found 1
+          set left-color red
           let energiaPerder  [energy] of leao-left * (energiaCombateHiena / 100)
           set energy energy - (energiaPerder / group)
           ask leao-left[die]
 
         ] leao-right != nobody [
-          show("[HIENA] COMBATEEEEEEEEEEEEEE RIGHT")
           set found 1
+          set right-color red
           let energiaPerder  [energy] of leao-right * (energiaCombateHiena / 100)
           set energy energy - (energiaPerder / group)
           ask leao-right[die]
 
         ] leao-ahead != nobody [
-          show("[HIENA] COMBATEEEEEEEEEEEEEE AHEAD")
+          set ahead-color red
           set found 1
           let energiaPerder  [energy] of leao-ahead * (energiaCombateHiena / 100)
           set energy energy - (energiaPerder / group)
@@ -357,6 +384,7 @@ to move_hiennas
 
         fd 1  ;; move forward
         set energy energy - 1
+
       ] random-direction = 1 [
 
         if tNumHienas > 0 [
@@ -473,7 +501,7 @@ comidaPequena
 comidaPequena
 0
 20
-9.0
+10.0
 1
 1
 NIL
@@ -503,7 +531,7 @@ quantLions
 quantLions
 0
 50
-22.0
+50.0
 1
 1
 NIL
@@ -533,7 +561,7 @@ comidaGrandeEnergy
 comidaGrandeEnergy
 0
 50
-23.0
+40.0
 1
 1
 NIL
@@ -548,7 +576,7 @@ comidaPequenaEnergy
 comidaPequenaEnergy
 0
 50
-25.0
+20.0
 1
 1
 NIL
@@ -634,48 +662,40 @@ energiaCombateHiena
 energiaCombateHiena
 0
 100
-17.0
+50.0
 1
 1
 NIL
 HORIZONTAL
 
 @#$#@#$#@
-## WHAT IS IT?
+## Introdução do Trabalho Prático
 
-(a general understanding of what the model is trying to show or explain)
+O objetivo deste trabalho, com 2 valores de cotação, consiste em conceber, implementar e analisar comportamentos racionais para agentes reativos. O trabalho deve ser realizado na ferramenta NetLogo, onde num mundo (ou ambiente) habitam dois tipos de agentes. No ambiente existem células de diferentes espécies que concedem vantagens ou desvantagens aos agentes.
 
-## HOW IT WORKS
+## Como funciona
 
-(what rules the agents use to create the overall behavior of the model)
+No ambiente existe agentes leões e agentes hienas, onde que também existe comida e presas.
 
-## HOW TO USE IT
+## Como usar
 
-(how to use the model, including a description of each of the items in the Interface tab)
+Slider "comidaPequena" -> Percentagem de Comida (pequena) que existe no ambiente
+Slider "comidaGrande" -> Percentagem de Comida (pequena) que existe no ambiente
+Slider "quantLions" -> Quantidade de Leões
+Slider "quantHienas" -> Quantidade de Hienas
+Entrada "energiaAgentes" -> Energia Inicial dos Agentes
+Entrada "descansoLeao" -> Tempo de descanso do Leão quando percebe o ninho
+Plot "Quantidade Leões & Hienas" -> Quantidade de leões e hienas (vivas)
+Slider "comidaGrandeEnergy" -> Quantidade de energia que a comida grande dá ao agente (hiena ou leão)
+Slider "comidaPequenaEnergy" ->  Quantidade de energia que a comida grande dá ao agente (hiena ou leão)
+Slider "energiaAlimentacao" -> Energia que o agente leão precisa de ter (pelo menos) para fazer ações.
+Slider "energiaCombateLeao" -> Percentagem que o Leão perde de energia em combate
+Slider "energiaCombateHiena" -> Percentagem que o Hiena perde de energia em combate
 
-## THINGS TO NOTICE
+## Créditos
 
-(suggested things for the user to notice while running the model)
-
-## THINGS TO TRY
-
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
-
-## EXTENDING THE MODEL
-
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
-
-## NETLOGO FEATURES
-
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
-
-## RELATED MODELS
-
-(models in the NetLogo Models Library and elsewhere which are of related interest)
-
-## CREDITS AND REFERENCES
-
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+José Xavier a2021136585@isec.pt
+Pedro Martins a2021118351@isec.pt
 @#$#@#$#@
 default
 true

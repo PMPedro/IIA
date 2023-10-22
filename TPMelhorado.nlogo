@@ -1,10 +1,14 @@
+;globals[
+;  verifica
+;  verifica2
+;]
 ; Células Castanhas -> Pequeno Porte
 ; Células Vermelhas -> Grande Porte
 ; Hienas -> Fish
 ; Leões -> Bug
 breed [hienas hiena]
 breed [lions lion]
-breed [prays pray]
+breed [preys prey]
 lions-own [
   sleep-timer
   energy
@@ -14,7 +18,7 @@ hienas-own [
   energy
   group
 ]
-prays-own [energy]
+preys-own [energy]
 
 
 to setup
@@ -36,13 +40,13 @@ to setup
 
   setupLions
   setupHienas
-  setupPrays
+  setuppreys
 
   reset-ticks
 end
 
-to setupPrays
-  create-prays NrPresas [
+to setuppreys
+  create-preys NrPresas [
     set color green
     set shape "circle"
     set size 1
@@ -88,11 +92,34 @@ to go
     ]
   ]
 
+;  if not any? lions with [energy > 0] and verifica != 1 [
+;    print (word "O último leão morreu no tick " ticks)
+;    set verifica 1
+;  ]
+;
+;  if not any? hienas with [energy > 0] and verifica2 != 1 [
+;    print (word "A última hiena morreu no tick " ticks)
+;    set verifica2 1
+;  ]
+;
+;  if ticks = 500 [
+;
+;    if count lions != 0 [print(word "Leões Vivos: " count lions)]
+;
+;    if count hienas != 0 [print(word "Hienas Vivas: " count hienas)]
+;
+;    show("------")
+;
+;    stop
+;  ]
+
+  if count hienas = 0 and count lions = 0 [stop]
+
   ask turtles [
     ifelse energy <= 0 [ die ][
       if breed = lions [move_lions]
       if breed = hienas [move_hiennas]
-      if breed = prays [move_presas]
+      if breed = preys [move_presas]
     ]
   ]
 
@@ -101,7 +128,7 @@ to go
 end
 
 to move_presas
-  ask prays [
+  ask preys [
     let found 0
     let random-direction random 3
     let ahead-color [pcolor] of patch-ahead 1
@@ -194,9 +221,9 @@ to move_lions
         ; Vai se alimentar primeiro, no caso de ter comida nas suas perceções
         ; Vai se movimentar em segundo
 
-        let pray-ahead prays-on ahead-destino
-        let pray-left prays-on left-destino
-        let pray-right prays-on right-destino
+        let prey-ahead preys-on ahead-destino
+        let prey-left preys-on left-destino
+        let prey-right preys-on right-destino
 
 
         (ifelse pcolor = brown [  ; começa a prioridade alimentação
@@ -256,16 +283,15 @@ to move_lions
           set found 1
           set energy energy - 1
 
-        ] any? pray-ahead or any? pray-left or any? pray-right [
+        ] any? prey-ahead or any? prey-left or any? prey-right [
           let target nobody
           (ifelse
-            any? pray-ahead [ set target pray-ahead ]
-            any? pray-left [ set target pray-left ]
-            any? pray-right [ set target pray-right ]
+            any? prey-ahead [ set target prey-ahead ]
+            any? prey-left [ set target prey-left ]
+            any? prey-right [ set target prey-right ]
           )
 
           if target != nobody [
-            show("[LEAO] MATOU PRESA")
             ask one-of target [die]
             set energy energy + EnergyPresas  ; LEAO MATOU PRESA
           ]
@@ -278,7 +304,6 @@ to move_lions
 
               let chance-vitoria random-float 1.0
               if chance-vitoria < 0.5 [
-                show("[LEAO] COMBATE AHEAD")
                 set energy energy - ([energy] of hiena-ahead * (energiaCombateLeao / 100))
                 set ahead-color brown
                 ask hiena-ahead[die]
@@ -288,7 +313,6 @@ to move_lions
 
               let chance-vitoria random-float 1.0
               if chance-vitoria < 0.5 [
-                show("[LEAO] COMBATE LEFT")
                 set energy energy - ([energy] of hiena-left * (energiaCombateLeao / 100))
                 set left-color brown
                 ask hiena-left[die]
@@ -297,7 +321,6 @@ to move_lions
             ] hiena-right != nobody [
               let chance-vitoria random-float 1.0
               if chance-vitoria < 0.5 [
-                show("[LEAO] COMBATE RIGHT")
                 set energy energy - ([energy] of hiena-right * (energiaCombateLeao / 100))
                 set right-color brown
                 ask hiena-right[die]
@@ -377,9 +400,9 @@ to move_hiennas
     let aNumLeoes count lions-on ahead-destino
     let tNumLeoes lNumLeoes + rNumLeoes + aNumLeoes
 
-    let pray-ahead prays-on ahead-destino
-    let pray-left prays-on left-destino
-    let pray-right prays-on right-destino
+    let prey-ahead preys-on ahead-destino
+    let prey-left preys-on left-destino
+    let prey-right preys-on right-destino
 
     (ifelse tNumHienas > 0 [
       set color yellow
@@ -389,73 +412,71 @@ to move_hiennas
       set group 1; só a própria
     ])
 
+    if (energy <= energiaAlimentacao) [
 
-    (ifelse pcolor = brown [  ; começa a prioridade alimentação
+      (ifelse pcolor = brown [  ; começa a prioridade alimentação
 
-      set energy energy + comidaPequenaEnergy
-      set pcolor black
-      set found 1
+        set energy energy + comidaPequenaEnergy
+        set pcolor black
+        set found 1
 
-    ] pcolor = red [
+      ] pcolor = red [
 
-      set energy energy + comidaGrandeEnergy
-      set pcolor black
-      set found 1
+        set energy energy + comidaGrandeEnergy
+        set pcolor black
+        set found 1
 
-    ] any? pray-ahead or any? pray-left or any? pray-right [
-      let target nobody
-      (ifelse
-        any? pray-ahead [ set target pray-ahead ]
-        any? pray-left [ set target pray-left ]
-        any? pray-right [ set target pray-right ]
-      )
+      ] any? prey-ahead or any? prey-left or any? prey-right [
+        let target nobody
+        (ifelse
+          any? prey-ahead [ set target prey-ahead ]
+          any? prey-left [ set target prey-left ]
+          any? prey-right [ set target prey-right ]
+        )
 
-      if target != nobody [
-        show("[HIENA] MATOU PRESA")
-        ask one-of target [die]
-        set energy energy + EnergyPresas  ; LEAO MATOU PRESA
-      ]
-    ] tNumHienas > 0 [
+        if target != nobody [
+          ask one-of target [die]
+          set energy energy + EnergyPresas  ; HIENA MATOU PRESA
+        ]
+      ] tNumHienas > 0 [
 
-      if tNumLeoes = 1 [
+        if tNumLeoes = 1 [
 
-        let leao-ahead one-of lions-here  with [patch-here = ahead-destino]
-        let leao-left one-of lions-here  with [patch-here = left-destino]
-        let leao-right one-of lions-here  with [patch-here = right-destino]
+          let leao-ahead one-of lions-here  with [patch-here = ahead-destino]
+          let leao-left one-of lions-here  with [patch-here = left-destino]
+          let leao-right one-of lions-here  with [patch-here = right-destino]
 
-        (ifelse leao-left != nobody [
-          let chance-vitoria random-float 1.0
-          if chance-vitoria < 0.5 [
-            show("[HIENA] COMBATE LEFT")
-            set found 1
-            let energiaPerder  [energy] of leao-left * (energiaCombateHiena / 100)
-            set energy energy - (energiaPerder / group)
-            ask leao-left[die]
-          ]
+          (ifelse leao-left != nobody [
+            let chance-vitoria random-float 1.0
+            if chance-vitoria < 0.5 [
+              set found 1
+              let energiaPerder  [energy] of leao-left * (energiaCombateHiena / 100)
+              set energy energy - (energiaPerder / group)
+              ask leao-left[die]
+            ]
 
-        ] leao-right != nobody [
-          let chance-vitoria random-float 1.0
-          if chance-vitoria < 0.5 [
-            show("[HIENA] COMBATE RIGHT")
-            set found 1
-            let energiaPerder  [energy] of leao-right * (energiaCombateHiena / 100)
-            set energy energy - (energiaPerder / group)
-            ask leao-right[die]
-          ]
+          ] leao-right != nobody [
+            let chance-vitoria random-float 1.0
+            if chance-vitoria < 0.5 [
+              set found 1
+              let energiaPerder  [energy] of leao-right * (energiaCombateHiena / 100)
+              set energy energy - (energiaPerder / group)
+              ask leao-right[die]
+            ]
 
-        ] leao-ahead != nobody [
-          let chance-vitoria random-float 1.0
-          if chance-vitoria < 0.5 [
-            show("[HIENA] COMBATE AHEAD")
-            set found 1
-            let energiaPerder  [energy] of leao-ahead * (energiaCombateHiena / 100)
-            set energy energy - (energiaPerder / group)
-            ask leao-ahead[die]
-          ]
+          ] leao-ahead != nobody [
+            let chance-vitoria random-float 1.0
+            if chance-vitoria < 0.5 [
+              set found 1
+              let energiaPerder  [energy] of leao-ahead * (energiaCombateHiena / 100)
+              set energy energy - (energiaPerder / group)
+              ask leao-ahead[die]
+            ]
 
-        ])
-      ]
-    ])
+          ])
+        ]
+      ])
+    ]
 
     if found = 0  [
       (ifelse random-direction = 0 [
@@ -651,7 +672,7 @@ comidaGrandeEnergy
 comidaGrandeEnergy
 0
 50
-23.0
+25.0
 1
 1
 NIL
@@ -703,7 +724,7 @@ energiaAlimentacao
 energiaAlimentacao
 0
 100
-70.0
+50.0
 1
 1
 NIL
@@ -737,7 +758,7 @@ energiaCombateLeao
 energiaCombateLeao
 0
 100
-20.0
+80.0
 1
 1
 NIL
@@ -752,7 +773,7 @@ energiaCombateHiena
 energiaCombateHiena
 0
 100
-17.0
+60.0
 1
 1
 NIL
@@ -767,7 +788,7 @@ NrPresas
 NrPresas
 0
 100
-64.0
+32.0
 1
 1
 NIL
@@ -789,41 +810,35 @@ NIL
 HORIZONTAL
 
 @#$#@#$#@
-## WHAT IS IT?
+## Introdução do Trabalho Prático
 
-(a general understanding of what the model is trying to show or explain)
+O objetivo deste trabalho, com 2 valores de cotação, consiste em conceber, implementar e analisar comportamentos racionais para agentes reativos. O trabalho deve ser realizado na ferramenta NetLogo, onde num mundo (ou ambiente) habitam dois tipos de agentes. No ambiente existem células de diferentes espécies que concedem vantagens ou desvantagens aos agentes.
 
-## HOW IT WORKS
+## Como funciona
 
-(what rules the agents use to create the overall behavior of the model)
+No ambiente existe agentes leões e agentes hienas, onde que também existe comida e presas.
 
-## HOW TO USE IT
+## Como usar
 
-(how to use the model, including a description of each of the items in the Interface tab)
+Slider "comidaPequena" -> Percentagem de Comida (pequena) que existe no ambiente
+Slider "comidaGrande" -> Percentagem de Comida (pequena) que existe no ambiente
+Slider "quantLions" -> Quantidade de Leões
+Slider "quantHienas" -> Quantidade de Hienas
+Entrada "energiaAgentes" -> Energia Inicial dos Agentes
+Entrada "descansoLeao" -> Tempo de descanso do Leão quando percebe o ninho
+Plot "Quantidade Leões & Hienas" -> Quantidade de leões e hienas (vivas)
+Slider "comidaGrandeEnergy" -> Quantidade de energia que a comida grande dá ao agente (hiena ou leão)
+Slider "comidaPequenaEnergy" ->  Quantidade de energia que a comida grande dá ao agente (hiena ou leão)
+Slider "energiaAlimentacao" -> Energia que o agente leão precisa de ter (pelo menos) para fazer ações.
+Slider "energiaCombateLeao" -> Percentagem que o Leão perde de energia em combate
+Slider "energiaCombateHiena" -> Percentagem que o Hiena perde de energia em combate
+Slider "NrPresas" -> Número de Presas
+Slider "EnergyPresas" -> Energia das Presas
 
-## THINGS TO NOTICE
+## Créditos
 
-(suggested things for the user to notice while running the model)
-
-## THINGS TO TRY
-
-(suggested things for the user to try to do (move sliders, switches, etc.) with the model)
-
-## EXTENDING THE MODEL
-
-(suggested things to add or change in the Code tab to make the model more complicated, detailed, accurate, etc.)
-
-## NETLOGO FEATURES
-
-(interesting or unusual features of NetLogo that the model uses, particularly in the Code tab; or where workarounds were needed for missing features)
-
-## RELATED MODELS
-
-(models in the NetLogo Models Library and elsewhere which are of related interest)
-
-## CREDITS AND REFERENCES
-
-(a reference to the model's URL on the web if it has one, as well as any other necessary credits, citations, and links)
+José Xavier a2021136585@isec.pt
+Pedro Martins a2021118351@isec.pt
 @#$#@#$#@
 default
 true
