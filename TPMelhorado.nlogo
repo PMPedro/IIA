@@ -4,15 +4,17 @@
 ; Leões -> Bug
 breed [hienas hiena]
 breed [lions lion]
+breed [prays pray]
 lions-own [
   sleep-timer
-  energy ;;Energia/vida dos agentes
+  energy
   ninho
 ]
 hienas-own [
   energy
   group
 ]
+prays-own [energy]
 
 
 to setup
@@ -34,8 +36,19 @@ to setup
 
   setupLions
   setupHienas
+  setupPrays
 
   reset-ticks
+end
+
+to setupPrays
+  create-prays NrPresas [
+    set color green
+    set shape "circle"
+    set size 1
+    set energy EnergyPresas
+    setxy random-xcor random-ycor
+  ]
 end
 
 to setupLions
@@ -79,11 +92,58 @@ to go
     ifelse energy <= 0 [ die ][
       if breed = lions [move_lions]
       if breed = hienas [move_hiennas]
+      if breed = prays [move_presas]
     ]
   ]
 
 
   tick
+end
+
+to move_presas
+  ask prays [
+    let found 0
+    let random-direction random 3
+    let ahead-color [pcolor] of patch-ahead 1
+    let ahead-patch patch-ahead 1
+    let aNumHienas count hienas-on ahead-patch
+    let aNumLions count lions-on ahead-patch
+
+    if energy <= 0 [ die ]
+
+    if (aNumHienas >= 1 and aNumLions >= 1) [
+      set random-direction random 3
+
+      if random-direction = 0 [
+        left 90 ;; turn left by 90 degrees
+        fd 1 ;; move forward
+        set energy energy - 1
+      ]
+      if random-direction = 1 [
+        left 90 ;; turn left by 90 degrees
+        fd 1 ;; move forward
+        set energy energy - 1
+      ]
+    ]
+
+    if found = 0 [
+
+      if random-direction = 0 [
+        fd 1 ;; move forward
+        set energy energy - 1
+      ]
+      if random-direction = 1 [
+        left 90 ;; turn left by 90 degrees
+        fd 1 ;; move forward
+        set energy energy - 1
+      ]
+      if random-direction = 2 [
+        right 90 ;; turn right by 90 degrees
+        fd 1 ;; move forward
+        set energy energy - 1
+      ]
+    ]
+  ]
 end
 
 to move_lions
@@ -106,6 +166,7 @@ to move_lions
     let aNumHienas count hienas-on ahead-destino
 
     let totalHienas lnumHienas + rNumHienas + aNumHienas
+
 
     (ifelse left-color = blue [ ; se encontrar célula azul na perceção, descansa.
       left 90
@@ -132,6 +193,12 @@ to move_lions
         ; se o nível de energia for inferior ao valor definido pelo utilizador
         ; Vai se alimentar primeiro, no caso de ter comida nas suas perceções
         ; Vai se movimentar em segundo
+
+        let pray-ahead prays-on ahead-destino
+        let pray-left prays-on left-destino
+        let pray-right prays-on right-destino
+
+
         (ifelse pcolor = brown [  ; começa a prioridade alimentação
 
           set energy energy + comidaPequenaEnergy
@@ -189,52 +256,78 @@ to move_lions
           set found 1
           set energy energy - 1
 
+        ] any? pray-ahead or any? pray-left or any? pray-right [
+          let target nobody
+          (ifelse
+            any? pray-ahead [ set target pray-ahead ]
+            any? pray-left [ set target pray-left ]
+            any? pray-right [ set target pray-right ]
+          )
+
+          if target != nobody [
+            show("[LEAO] MATOU PRESA")
+            ask one-of target [die]
+            set energy energy + EnergyPresas  ; LEAO MATOU PRESA
+          ]
         ] totalHienas = 1 [
-          set found 1
-          let hiena-ahead one-of hienas-here  with [patch-here = ahead-destino]
-          let hiena-left one-of hienas-here  with [patch-here = left-destino]
-          let hiena-right one-of hienas-here  with [patch-here = right-destino]
-          (ifelse hiena-ahead != nobody[
-            show("[LEAO] COMBATEEEEEEEEEEEEEE AHEAD")
-            set energy energy - ([energy] of hiena-ahead * (energiaCombateLeao / 100))
-            set ahead-color brown
-            ask hiena-ahead[die]
-          ] hiena-left != nobody [
-            show("[LEAO] COMBATEEEEEEEEEEEEEE LEFT")
-            set energy energy - ([energy] of hiena-left * (energiaCombateLeao / 100))
-            set left-color brown
-            ask hiena-left[die]
-          ] hiena-right != nobody [
-            show("[LEAO] COMBATEEEEEEEEEEEEEE RIGHT")
-            set energy energy - ([energy] of hiena-right * (energiaCombateLeao / 100))
-            set right-color brown
-            ask hiena-right[die]
-          ])
-        ] lNumHienas >= 2 [
-          right 90
-          fd 1
-          set found 1
-          set energy energy - 2
-        ] rNumHienas >= 2 [
-          left 90
-          fd 1
-          set found 1
-          set energy energy - 2
-        ] aNumHienas >= 2 or (lNumHienas >= 1 and rNumHienas >= 1)[
-          back 1
-          set found 1
-          set energy energy - 3
-        ] lNumHienas >= 1 and aNumHienas >= 1 [
-          rt 180  ; Vira o agente 180 graus para ele olhar para trás
-          fd 1 ; Move o agente uma unidade para trás
-          rt 90  ; Vira o agente 90 graus para a direita
-          fd 1 ; Move o agente uma unidade para a direita
-          set energy energy - 5
-          set found 1
-        ] lNumHienas >= 1 and rNumHienas >= 1 and aNumHienas >= 1 [
-          back 2
-          set found 1
-          set energy energy - 4
+            set found 1
+            let hiena-ahead one-of hienas-here  with [patch-here = ahead-destino]
+            let hiena-left one-of hienas-here  with [patch-here = left-destino]
+            let hiena-right one-of hienas-here  with [patch-here = right-destino]
+            (ifelse hiena-ahead != nobody[
+
+              let chance-vitoria random-float 1.0
+              if chance-vitoria < 0.5 [
+                show("[LEAO] COMBATE AHEAD")
+                set energy energy - ([energy] of hiena-ahead * (energiaCombateLeao / 100))
+                set ahead-color brown
+                ask hiena-ahead[die]
+              ]
+
+            ] hiena-left != nobody [
+
+              let chance-vitoria random-float 1.0
+              if chance-vitoria < 0.5 [
+                show("[LEAO] COMBATE LEFT")
+                set energy energy - ([energy] of hiena-left * (energiaCombateLeao / 100))
+                set left-color brown
+                ask hiena-left[die]
+
+              ]
+            ] hiena-right != nobody [
+              let chance-vitoria random-float 1.0
+              if chance-vitoria < 0.5 [
+                show("[LEAO] COMBATE RIGHT")
+                set energy energy - ([energy] of hiena-right * (energiaCombateLeao / 100))
+                set right-color brown
+                ask hiena-right[die]
+              ]
+            ])
+          ] lNumHienas >= 2 [
+            right 90
+            fd 1
+            set found 1
+            set energy energy - 2
+          ] rNumHienas >= 2 [
+            left 90
+            fd 1
+            set found 1
+            set energy energy - 2
+          ] aNumHienas >= 2 or (lNumHienas >= 1 and rNumHienas >= 1)[
+            back 1
+            set found 1
+            set energy energy - 3
+          ] lNumHienas >= 1 and aNumHienas >= 1 [
+            rt 180  ; Vira o agente 180 graus para ele olhar para trás
+            fd 1 ; Move o agente uma unidade para trás
+            rt 90  ; Vira o agente 90 graus para a direita
+            fd 1 ; Move o agente uma unidade para a direita
+            set energy energy - 5
+            set found 1
+          ] lNumHienas >= 1 and rNumHienas >= 1 and aNumHienas >= 1 [
+            back 2
+            set found 1
+            set energy energy - 4
         ])
       ]
       if found = 0  [
@@ -284,6 +377,9 @@ to move_hiennas
     let aNumLeoes count lions-on ahead-destino
     let tNumLeoes lNumLeoes + rNumLeoes + aNumLeoes
 
+    let pray-ahead prays-on ahead-destino
+    let pray-left prays-on left-destino
+    let pray-right prays-on right-destino
 
     (ifelse tNumHienas > 0 [
       set color yellow
@@ -306,6 +402,19 @@ to move_hiennas
       set pcolor black
       set found 1
 
+    ] any? pray-ahead or any? pray-left or any? pray-right [
+      let target nobody
+      (ifelse
+        any? pray-ahead [ set target pray-ahead ]
+        any? pray-left [ set target pray-left ]
+        any? pray-right [ set target pray-right ]
+      )
+
+      if target != nobody [
+        show("[HIENA] MATOU PRESA")
+        ask one-of target [die]
+        set energy energy + EnergyPresas  ; LEAO MATOU PRESA
+      ]
     ] tNumHienas > 0 [
 
       if tNumLeoes = 1 [
@@ -315,25 +424,34 @@ to move_hiennas
         let leao-right one-of lions-here  with [patch-here = right-destino]
 
         (ifelse leao-left != nobody [
-          show("[HIENA] COMBATEEEEEEEEEEEEEE LEFT")
-          set found 1
-          let energiaPerder  [energy] of leao-left * (energiaCombateHiena / 100)
-          set energy energy - (energiaPerder / group)
-          ask leao-left[die]
+          let chance-vitoria random-float 1.0
+          if chance-vitoria < 0.5 [
+            show("[HIENA] COMBATE LEFT")
+            set found 1
+            let energiaPerder  [energy] of leao-left * (energiaCombateHiena / 100)
+            set energy energy - (energiaPerder / group)
+            ask leao-left[die]
+          ]
 
         ] leao-right != nobody [
-          show("[HIENA] COMBATEEEEEEEEEEEEEE RIGHT")
-          set found 1
-          let energiaPerder  [energy] of leao-right * (energiaCombateHiena / 100)
-          set energy energy - (energiaPerder / group)
-          ask leao-right[die]
+          let chance-vitoria random-float 1.0
+          if chance-vitoria < 0.5 [
+            show("[HIENA] COMBATE RIGHT")
+            set found 1
+            let energiaPerder  [energy] of leao-right * (energiaCombateHiena / 100)
+            set energy energy - (energiaPerder / group)
+            ask leao-right[die]
+          ]
 
         ] leao-ahead != nobody [
-          show("[HIENA] COMBATEEEEEEEEEEEEEE AHEAD")
-          set found 1
-          let energiaPerder  [energy] of leao-ahead * (energiaCombateHiena / 100)
-          set energy energy - (energiaPerder / group)
-          ask leao-ahead[die]
+          let chance-vitoria random-float 1.0
+          if chance-vitoria < 0.5 [
+            show("[HIENA] COMBATE AHEAD")
+            set found 1
+            let energiaPerder  [energy] of leao-ahead * (energiaCombateHiena / 100)
+            set energy energy - (energiaPerder / group)
+            ask leao-ahead[die]
+          ]
 
         ])
       ]
@@ -635,6 +753,36 @@ energiaCombateHiena
 0
 100
 17.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+681
+525
+853
+558
+NrPresas
+NrPresas
+0
+100
+64.0
+1
+1
+NIL
+HORIZONTAL
+
+SLIDER
+686
+588
+858
+621
+EnergyPresas
+EnergyPresas
+0
+100
+72.0
 1
 1
 NIL
