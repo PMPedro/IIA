@@ -61,6 +61,12 @@ build CMakeFiles/TP2.dir/aux.c.obj: C_COMPILER__TP2_unscanned_Debug C$:/Users/pm
   OBJECT_DIR = CMakeFiles\TP2.dir
   OBJECT_FILE_DIR = CMakeFiles\TP2.dir
 
+build CMakeFiles/TP2.dir/functions.c.obj: C_COMPILER__TP2_unscanned_Debug C$:/Users/pmanu/Desktop/3Ano/IIA/TP/TP2/functions.c || cmake_object_order_depends_target_TP2
+  DEP_FILE = CMakeFiles\TP2.dir\functions.c.obj.d
+  FLAGS = -g -std=gnu11 -fdiagnostics-color=always
+  OBJECT_DIR = CMakeFiles\TP2.dir
+  OBJECT_FILE_DIR = CMakeFiles\TP2.dir
+
 
 # =============================================================================
 # Link build statements for EXECUTABLE target TP2
@@ -69,7 +75,7 @@ build CMakeFiles/TP2.dir/aux.c.obj: C_COMPILER__TP2_unscanned_Debug C$:/Users/pm
 #############################################
 # Link the executable TP2.exe
 
-build TP2.exe: C_EXECUTABLE_LINKER__TP2_Debug CMakeFiles/TP2.dir/main.c.obj CMakeFiles/TP2.dir/aux.c.obj
+build TP2.exe: C_EXECUTABLE_LINKER__TP2_Debug CMakeFiles/TP2.dir/main.c.obj CMakeFiles/TP2.dir/aux.c.obj CMakeFiles/TP2.dir/functions.c.obj
   FLAGS = -g
   LINK_LIBRARIES = -lkernel32 -luser32 -lgdi32 -lwinspool -lshell32 -lole32 -loleaut32 -luuid -lcomdlg32 -ladvapi32
   OBJECT_DIR = CMakeFiles\TP2.dir
