@@ -11,27 +11,26 @@ Caminho sol[Its];
     if(partida = 0)
         partida = Data[0].from;
     for(int i=0; i < tam;i++){
-        if(Data[i].from == partida){
-            if(Data[i].custo < menor){
+        if(Data[i].from == partida) {
+            if (Data[i].custo < menor) {
                 menor = Data[i].custo;
                 sol[it] = Data[i];
             }
+        }
             if(i == tam){
                 if(it < Its)
                 i = 0;
                 it++;
             }
         }
-    }
+
     if(fc == 0){
         melhorSol (custoAntigo, Data, Its, sol, tam, partida, rep);
     }else{
-
         printf("\nMelhor Custo: " );
-
         }
     }
-}
+
 
 void melhorSol (int cA, Caminho *Data, int ITs, Caminho *Sol, int Tam, int partida, int rep){
     //1ºcalcula vol
