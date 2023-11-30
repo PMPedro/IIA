@@ -10,7 +10,7 @@
 
 
 #endif //TP2_AUX_H
-typedef struct{
+typedef struct {
     int from;
     int to;
     int custo;
@@ -24,4 +24,5 @@ typedef struct {
 
 fichHelper get_file_size(char *filename);
 void getData(Caminho *caminho, int tam, char *filename);
+void check_data(Caminho *data, int size);
 
