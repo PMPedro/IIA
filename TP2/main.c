@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <string.h>
-#include "aux.h"
+#include "auxili.h"
 
 int main() {
     fichHelper fh;

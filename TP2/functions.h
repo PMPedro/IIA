@@ -4,7 +4,7 @@
 
 #ifndef TP2_FUNCTIONS_H
 #define TP2_FUNCTIONS_H
-#include "aux.h"
+#include "auxili.h"
 void melhorSol (int cA, Caminho *Data, int ITs, Caminho *Sol, int Tam, int partida, int rep);
 void custo_minimo(Caminho *Data, int tam, int partida, int Its,int custoAntigo, int fc, int rep);
 
