@@ -8,4 +8,6 @@ add_executable(TP2 main.c
         aux.h
         functions.c
         functions.h
+        aux.c
+        aux.h
 )
