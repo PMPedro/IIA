@@ -26,8 +26,11 @@ int main() {
 
  //   printf("\n%d %d, test", data[0].custo, data[1].custo);
     //check_data(data, fh.size);
+    int Its;
+    printf("\n Diga um num de Iteneracoes");
+    scanf("%d",&Its);
 
-    encontraSolucao(5, data, fh.size, 0);
+    encontraSol (data, fh.size, Its);
   // custo_minimo(data, fh.size, 0, 4, 0, 0, 0);
    // printf("Teste 1");
     //printf("%d",data[fh.size-1].custo);
