@@ -8,4 +8,6 @@ add_executable(TP2 main.c
         functions.h
         auxili.c
         auxili.h
+        hillclimbing.c
+        hillclimbing.h
 )

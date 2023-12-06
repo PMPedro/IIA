@@ -89,7 +89,7 @@ int guardax = 0, custo = 0, menor = 1000000;
     }
     custo = 0;
     for(int l = 0; l < y; l++){
-        printf("\n[\n%d   |   %d|   %d]",Sols[guardax][l].from,Sols[guardax][l].to,Sols[guardax][l].to);
+        printf("\n[%d   |   %d|   %d]",Sols[guardax][l].from,Sols[guardax][l].to,Sols[guardax][l].to);
         custo = Sols[guardax][l].custo + custo;
 
     }
