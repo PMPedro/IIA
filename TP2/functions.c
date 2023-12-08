@@ -5,7 +5,7 @@
 #include <stdbool.h>
 #include "functions.h"
 
-
+//funcao para encontrar todas as sols possiveis
 void encontraSol (Caminho *data, int size, int Its){
     int i = 0, partida = 0, sol = 0;
 
@@ -68,7 +68,7 @@ void encontraSol (Caminho *data, int size, int Its){
     }
     analizaSols(soluencontrada, x, Its);
 }
-
+//analisa todas as sols encontradas e envia a que tem menor custo
 void analizaSols(Caminho **Sols, int x, int y){
 int guardax = 0, custo = 0, menor = 1000000;
 
@@ -89,7 +89,7 @@ int guardax = 0, custo = 0, menor = 1000000;
     }
     custo = 0;
     for(int l = 0; l < y; l++){
-        printf("\n[%d   |   %d|   %d]",Sols[guardax][l].from,Sols[guardax][l].to,Sols[guardax][l].to);
+        printf("\n[D:  %d  |P:  %d  |C:  %d  ]",Sols[guardax][l].from,Sols[guardax][l].to,Sols[guardax][l].custo);
         custo = Sols[guardax][l].custo + custo;
 
     }
