@@ -15,6 +15,7 @@ void vizinhancaReparacao(int *solucao, int tam, Caminho *caminhos, int valorK);
 void trepaColinas(Caminho *caminhos, int tam, int valorK, int Its);
 void recombinacao (int tam, int crossover, int *sol1, int *sol2, int *solatual);
 void trepaColinasEvolutivo(Caminho *caminhos, int tam, int valorK, int Its);
+void trepaColinasHibrido(Caminho *caminhos, int tam, int valorK, int Its);
 
 
 #endif /* TREPACOLINAS_H */

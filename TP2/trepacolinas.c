@@ -201,3 +201,75 @@ void trepaColinasEvolutivo(Caminho *caminhos, int tam, int valorK, int Its) {
     free(solucao_atual);
     free(melhor_solucao);
 }
+
+
+
+void trepaColinasHibrido(Caminho *caminhos, int tam, int valorK, int Its) {
+    int *solucao_atual = malloc(tam * sizeof(int));
+    int *vizi1 = malloc(tam * sizeof(int));
+    int *vizi2 = malloc(tam * sizeof(int));
+    int *vizi3 = malloc(tam * sizeof(int));
+    int *melhor_solucao = malloc(tam * sizeof(int));
+    int custo_atual, melhor_custo;
+    int iteracoes_sem_melhora = 0;
+    const int max_iter_sem_melhora = 100;
+
+    geraSolInicial(solucao_atual, tam);
+    custo_atual = avaliaSolucao(caminhos, tam, solucao_atual);
+
+    // Inicializa a melhor solução com a solução inicial
+    for (int i = 0; i < tam; ++i) {
+        melhor_solucao[i] = solucao_atual[i];
+        vizi3[i] = solucao_atual[i];
+    }
+    melhor_custo = custo_atual;
+    int i = 0;
+    while (i < Its) {
+        // Gera uma solução na vizinhança da solução atual
+        vizinhancaTroca(vizi3, tam);
+
+
+        geraSolInicial(vizi1, tam);
+        geraSolInicial(vizi2, tam);
+        recombinacao(tam,tam/2,vizi1,vizi2,solucao_atual);
+
+        if(avaliaSolucao(caminhos,tam, solucao_atual) > avaliaSolucao(caminhos, tam, vizi3)){
+            for (int i = 0; i < tam; ++i) {
+                solucao_atual[i] = vizi3[i];
+            }
+        }
+
+        // Verifica se a nova solução viola alguma restrição e repara se necessário
+        if(!solucaoValida(caminhos, tam, solucao_atual)){
+            vizinhancaReparacao(solucao_atual,tam, caminhos, valorK);
+        }
+
+        // Avalia a nova solução
+        int novo_custo = avaliaSolucao(caminhos, tam, solucao_atual);
+
+        // Compara com a melhor solução encontrada até agora
+        if (novo_custo < melhor_custo) {
+            // Atualiza a melhor solução
+            for (int i = 0; i < tam; ++i) {
+                melhor_solucao[i] = solucao_atual[i];
+            }
+            melhor_custo = novo_custo;
+            iteracoes_sem_melhora = 0; // Reseta contador de iterações sem melhora
+        } else {
+            iteracoes_sem_melhora++;
+        }
+        i++;
+    }
+
+
+    // Exibe a melhor solução encontrada
+    printf("Melhor Solucao encontrada: ");
+    for (int i = 0; i < tam; ++i) {
+        printf("%d ", melhor_solucao[i]);
+    }
+    printf("\nCusto final: %d\n", melhor_custo);
+
+    // Libera a memória alocada
+    free(solucao_atual);
+    free(melhor_solucao);
+}

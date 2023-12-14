@@ -59,7 +59,25 @@ int main() {
         free(data);
 
     } else if (op == 3) {
-        // Adicione código para a opção 3 (Algoritmo Hibrido) aqui, se necessário
+        // Adicione código para a opção 2 (Algoritmo Evolutivo) aqui, se necessário
+
+        fichHelper fh;
+        fh = leDadosInicial(filename);
+        fh.caminhos = contarLinhas(filename) - 2; // 2 por causa do k e do p edges
+        Caminho *data = malloc(fh.caminhos * sizeof(Caminho));
+        if (data == NULL) {
+            perror("Erro na alocação de memória");
+            return -1;
+        }
+
+        leDados(data, fh.caminhos, filename);
+
+        // Chama a função Trepa Colinas
+        int Its;
+        printf("\nQts Its? \n\t:"); scanf("%d",&Its);
+        trepaColinasHibrido(data, fh.caminhos, fh.valorK,Its);
+
+        free(data);
     } else {
         printf("Opcao Invalida\n");
     }
