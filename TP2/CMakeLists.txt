@@ -10,4 +10,6 @@ add_executable(TP2 main.c
         auxili.h
         hillclimbing.c
         hillclimbing.h
+        trepacolinas.c
+        trepacolinas.h
 )

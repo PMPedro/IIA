@@ -1,9 +1,6 @@
-//
-// Created by pmanu on 23/11/2023.
-//
-
 #ifndef TP2_AUX_H
 #define TP2_AUX_H
+
 #include "stdio.h"
 #include "string.h"
 #include "math.h"
@@ -14,15 +11,18 @@ typedef struct {
     int from;
     int to;
     int custo;
-}Caminho;
+} Caminho;
 
 typedef struct {
-    int valorK;
-    int size;
-}fichHelper;
+    int caminhos, valorK, arestas, vertices;
+} fichHelper;
 
+fichHelper leDadosInicial(char *filename);
 
-fichHelper get_file_size(char *filename);
-void getData(Caminho *caminho, int tam, char *filename);
+void leDados(Caminho *caminho, int tam, const char *filename);
+
 void check_data(Caminho *data, int size);
 
+void init_rand();
+
+int contarLinhas(const char *nomeArquivo);
