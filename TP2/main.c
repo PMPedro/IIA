@@ -8,6 +8,14 @@ int main() {
     printf("Introduza o nome do ficheiro: ");
     gets(filename);
 
+    FILE* fpcheck;
+    fpcheck = fopen(filename, "r");
+    if(!fpcheck){
+        perror("\nEsse ficheiro e invalido!");
+        return -1;
+    }
+
+
     // Menu
     printf("1- Trepa Colinas\n");
     printf("2- Algoritmo Evolutivo\n");

@@ -7,13 +7,13 @@
 #include "auxili.h"
 #include <stdbool.h>
 
-void geraSolInicial(int *solucao, int tam);
+void geraSolInicial(int *solucao, int tam, int valork);
 bool solucaoValida(Caminho *caminho, int tam, int *sol);
 int avaliaSolucao(Caminho *caminhos, int tam, int *solucao);
 void vizinhancaTroca(int *solucao, int tam);
 void vizinhancaReparacao(int *solucao, int tam, Caminho *caminhos, int valorK);
 void trepaColinas(Caminho *caminhos, int tam, int valorK, int Its);
-void recombinacao (int tam, int crossover, int *sol1, int *sol2, int *solatual);
+void recombinacao (int tam, int crossover, int *sol1, int *sol2, int *solatual, int valork);
 void trepaColinasEvolutivo(Caminho *caminhos, int tam, int valorK, int Its);
 void trepaColinasHibrido(Caminho *caminhos, int tam, int valorK, int Its);
 

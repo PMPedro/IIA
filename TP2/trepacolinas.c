@@ -1,9 +1,20 @@
 
 #include "trepacolinas.h"
 
-void geraSolInicial(int *solucao, int tam) {
+void geraSolInicial(int *solucao, int tam, int valork) {
+
+    int cont;
+    int rando;
     for (int i = 0; i < tam; ++i) {
-        solucao[i] = rand() % 2; // Gera 0 ou 1 aleatoriamente
+        rando = rand() % 2;
+        if(rando == 1){
+            cont++;
+        }
+        if(cont == valork){
+            solucao[i] = 0;
+        }else{
+        solucao[i] = rando; // Gera 0 ou 1 aleatoriamente
+         }
     }
 }
 
@@ -85,7 +96,7 @@ void trepaColinas(Caminho *caminhos, int tam, int valorK, int Its) {
     int iteracoes_sem_melhora = 0;
     const int max_iter_sem_melhora = 100;
 
-    geraSolInicial(solucao_atual, tam);
+    geraSolInicial(solucao_atual, tam,valorK);
     custo_atual = avaliaSolucao(caminhos, tam, solucao_atual);
 
     // Inicializa a melhor solução com a solução inicial
@@ -129,13 +140,26 @@ void trepaColinas(Caminho *caminhos, int tam, int valorK, int Its) {
     free(solucao_atual);
     free(melhor_solucao);
 }
-void recombinacao (int tam, int crossover, int *sol1, int *sol2, int *solatual){
+void recombinacao (int tam, int crossover, int *sol1, int *sol2, int *solatual, int valork){
 
+int cont = 0;
     for(int i = 0; i < crossover; i ++){
+        if(sol1[i] == 1)
+            cont++;
+        if(cont == valork){
+        solatual[i] = 0;
+        }else{
         solatual[i] = sol1[i];
+        }
     }
     for(int i = crossover; i < tam; i++){
-        solatual[i] = sol2[i];
+        if(sol1[i] == 1)
+            cont++;
+        if(cont == valork){
+            solatual[i] = 0;
+        }else{
+            solatual[i] = sol2[i];
+        }
     }
 
 }
@@ -149,7 +173,7 @@ void trepaColinasEvolutivo(Caminho *caminhos, int tam, int valorK, int Its) {
     int iteracoes_sem_melhora = 0;
     const int max_iter_sem_melhora = 100;
 
-    geraSolInicial(solucao_atual, tam);
+    geraSolInicial(solucao_atual, tam,valorK);
     custo_atual = avaliaSolucao(caminhos, tam, solucao_atual);
 
     // Inicializa a melhor solução com a solução inicial
@@ -162,9 +186,9 @@ void trepaColinasEvolutivo(Caminho *caminhos, int tam, int valorK, int Its) {
         // Gera uma solução na vizinhança da solução atual
 
 
-        geraSolInicial(vizi1, tam);
-        geraSolInicial(vizi2, tam);
-        recombinacao(tam,tam/2,vizi1,vizi2,solucao_atual);
+        geraSolInicial(vizi1, tam,valorK);
+        geraSolInicial(vizi2, tam,valorK);
+        recombinacao(tam,tam/2,vizi1,vizi2,solucao_atual,valorK);
 
 
         // Verifica se a nova solução viola alguma restrição e repara se necessário
@@ -214,7 +238,7 @@ void trepaColinasHibrido(Caminho *caminhos, int tam, int valorK, int Its) {
     int iteracoes_sem_melhora = 0;
     const int max_iter_sem_melhora = 100;
 
-    geraSolInicial(solucao_atual, tam);
+    geraSolInicial(solucao_atual, tam,valorK);
     custo_atual = avaliaSolucao(caminhos, tam, solucao_atual);
 
     // Inicializa a melhor solução com a solução inicial
@@ -229,9 +253,9 @@ void trepaColinasHibrido(Caminho *caminhos, int tam, int valorK, int Its) {
         vizinhancaTroca(vizi3, tam);
 
 
-        geraSolInicial(vizi1, tam);
-        geraSolInicial(vizi2, tam);
-        recombinacao(tam,tam/2,vizi1,vizi2,solucao_atual);
+        geraSolInicial(vizi1, tam,valorK);
+        geraSolInicial(vizi2, tam,valorK);
+        recombinacao(tam,tam/2,vizi1,vizi2,solucao_atual,valorK);
 
         if(avaliaSolucao(caminhos,tam, solucao_atual) > avaliaSolucao(caminhos, tam, vizi3)){
             for (int i = 0; i < tam; ++i) {
