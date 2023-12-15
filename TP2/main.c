@@ -6,7 +6,7 @@ int main() {
     char filename[50];
     int op;
     printf("Introduza o nome do ficheiro: ");
-    gets(&filename);
+    gets(filename);
 
     FILE* fpcheck;
     fpcheck = fopen(filename, "r");
@@ -14,6 +14,7 @@ int main() {
         perror("\nEsse ficheiro e invalido!");
         return -1;
     }
+    fclose(fpcheck);
 
 
     // Menu
