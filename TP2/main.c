@@ -6,7 +6,7 @@ int main() {
     char filename[50];
     int op;
     printf("Introduza o nome do ficheiro: ");
-    gets(filename);
+    gets(&filename);
 
     FILE* fpcheck;
     fpcheck = fopen(filename, "r");
